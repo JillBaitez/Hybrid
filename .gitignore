@@ -1,5 +1,5 @@
-# Ignore build output directory
+node# Ignore build output directory
 dist/
-
+node_modules/
 # Ignore refactoring directory
 refactoring/

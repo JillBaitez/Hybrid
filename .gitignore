@@ -1,0 +1,5 @@
+# Ignore build output directory
+dist/
+
+# Ignore refactoring directory
+refactoring/

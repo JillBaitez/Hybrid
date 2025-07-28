@@ -1,0 +1,40 @@
+{
+  "name": "hybrid-thinking-os",
+  "version": "1.0.0",
+  "description": "Chrome extension for orchestrating AI providers without API keys",
+  "main": "src/core/sw.js",
+  "scripts": {
+    "build": "bash build.sh",
+    "build:win": "powershell -ExecutionPolicy Bypass -File build.ps1",
+    "lint": "eslint src/**/*.{js,ts}",
+    "format": "prettier --write src/**/*.{js,ts}",
+    "test": "jest",
+    "test:race": "jest --testNamePattern=\"race\"",
+    "test:csp": "jest --testNamePattern=\"csp\"",
+    "test:offline": "jest --testNamePattern=\"offline\"",
+    "test:token-leak": "jest --testNamePattern=\"token-leak\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.32.0",
+    "@rollup/plugin-typescript": "^11.1.0",
+    "@types/chrome": "^0.0.246",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.1",
+    "globals": "^16.3.0",
+    "jest": "^29.6.0",
+    "prettier": "^3.0.0",
+    "rollup": "^3.26.0",
+    "tslib": "^2.8.1",
+    "typescript": "^5.1.0",
+    "typescript-eslint": "^8.38.0"
+  },
+  "keywords": [
+    "chrome-extension",
+    "ai",
+    "automation",
+    "manifest-v3"
+  ],
+  "author": "HTOS Team",
+  "license": "MIT"
+}

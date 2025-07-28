@@ -1,0 +1,34 @@
+{
+  "name": "ChatGPT",
+  "baseUrl": "https://chat.openai.com",
+  "authType": "session",
+  "endpoints": {
+    "chat": "/backend-api/conversation",
+    "models": "/backend-api/models",
+    "auth": "/api/auth/session"
+  },
+  "headers": {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "text/event-stream",
+    "Accept-Language": "en-US,en;q=0.9"
+  },
+  "rateLimit": {
+    "requests": 50,
+    "window": 3600000
+  },
+  "selectors": {
+    "chatInput": "textarea[data-id='root']",
+    "sendButton": "button[data-testid='send-button']",
+    "messageContainer": "[data-testid='conversation-turn-']",
+    "loginButton": "button[data-testid='login-button']",
+    "sessionIndicator": "[data-testid='session-indicator']"
+  },
+  "tokenExtraction": {
+    "type": "cookie",
+    "name": "__Secure-next-auth.session-token",
+    "fallback": {
+      "type": "localStorage",
+      "key": "auth"
+    }
+  }
+}

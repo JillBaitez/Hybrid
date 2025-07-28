@@ -1,0 +1,73 @@
+{
+  "manifest_version": 3,
+  "name": "HTOS - Hybrid Thinking Sidecar OS",
+  "version": "1.0.0",
+  "description": "AI Provider Orchestration Engine - Session-based automation for Claude, ChatGPT, and Gemini",
+  "permissions": [
+    "alarms",
+    "background",
+    "cookies",
+    "declarativeNetRequest",
+    "tabs",
+    "storage",
+    "offscreen",
+    "scripting"
+  ],
+  "host_permissions": ["*://*/*"],
+  "background": {
+    "service_worker": "core/sw.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "exclude_matches": ["*://*/pow/0f.html", "*://*/host/0h.html"],
+      "js": ["core/cs.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+          "session-layer/nj-engine.js",
+          "session-layer/nj-engine.css",
+          "host/0h.html",
+          "pow/0f.html"
+        ],
+      "matches": ["*://*/*"]
+    }
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "htos_chatgpt_rules",
+        "enabled": true,
+        "path": "rules/chatgpt.json"
+      },
+      {
+        "id": "htos_claude_rules", 
+        "enabled": true,
+        "path": "rules/claude.json"
+      },
+      {
+        "id": "htos_gemini_rules",
+        "enabled": true,
+        "path": "rules/gemini.json"
+      }
+    ]
+  },
+  "action": {
+    "default_title": "HTOS - AI Orchestration",
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "icons/icon16.svg",
+    "32": "icons/icon32.svg",
+    "48": "icons/icon48.svg",
+    "128": "icons/icon128.svg"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  }
+}

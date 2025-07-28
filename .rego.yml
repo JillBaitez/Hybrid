@@ -1,0 +1,24 @@
+# 🔒 HTOS Architecture Immutables
+# This file contains the non-negotiable architecture pillars that MUST be preserved
+
+immutables:
+  - name: "DNR Rules First"
+    description: "Declarative Net Request rules MUST be registered synchronously in service worker init"
+    enforcement: "fail_if_missing"
+    
+  - name: "Service Worker Authority" 
+    description: "All tokens/cookies MUST be stored only in SW memory or chrome.storage.session"
+    enforcement: "fail_if_violated"
+    
+  - name: "Offscreen Singleton"
+    description: "Exactly one offscreen document per browser session via chrome.offscreen.createDocument"
+    enforcement: "fail_if_multiple"
+    
+  - name: "Bus Blob Protocol"
+    description: "Blobs MUST be converted to UUID references when crossing contexts"
+    enforcement: "fail_if_raw_binary"
+
+guardrails:
+  - "DNR rules removed": "!rules.some(r => r.id.startsWith('htos-'))"
+  - "Offscreen creation moved out of SW": "!swCode.includes('chrome.offscreen.createDocument')"
+  - "Token stored in content-script": "csCode.includes('localStorage.setItem(\"token\"')"

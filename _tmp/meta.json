@@ -1,0 +1,30 @@
+{
+  "inputs": {
+    "docs/bg.cleaned.simplified.js": {
+      "bytes": 2596363,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    }
+  },
+  "outputs": {
+    "_tmp/bundle.js": {
+      "imports": [],
+      "exports": [
+        "default"
+      ],
+      "entryPoint": "docs/bg.cleaned.simplified.js",
+      "inputs": {
+        "docs/bg.cleaned.simplified.js": {
+          "bytesInOutput": 2467086
+        }
+      },
+      "bytes": 2468147
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "bus_events": {
+    "privileged": [
+      "bus.getTabData",
+      "bus.sendToCs", 
+      "bus.proxy",
+      "bus.removeCsProxies",
+      "bus.blobIdToObjectUrl"
+    ],
+    "public": [
+      "automate",
+      "chat-ask",
+      "command-run", 
+      "command-step-added",
+      "context-menu-click",
+      "error",
+      "grab-click",
+      "install",
+      "note-acknowledged",
+      "note-clicked",
+      "note-closed",
+      "note-shown",
+      "pageview"
+    ]
+  },
+  "chrome_apis": [
+    "chrome.cookies",
+    "chrome.declarativeNetRequest", 
+    "chrome.offscreen",
+    "chrome.storage",
+    "chrome.tabs"
+  ],
+  "libraries_to_npm": [
+    "mobx",
+    "jszip",
+    "pako",
+    "js-yaml",
+    "nanoid"
+  ],
+  "bus_patterns": [
+    "bus.send",
+    "bus.on",
+    "bus.setIframe"
+  ],
+  "special_patterns": [
+    "bus.blob.*",
+    "bus.error.*",
+    "bus.channel"
+  ]
+}

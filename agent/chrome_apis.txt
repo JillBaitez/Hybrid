@@ -1,5 +1,0 @@
-chrome.cookies
-chrome.declarativeNetRequest
-chrome.offscreen
-chrome.storage
-chrome.tabs

@@ -1,12 +1,3 @@
-node# Ignore build output directory
-dist/
-node_modules/
-# Ignore refactoring directory
-refactoring/
-.git/
-.idea/
-package-lock.json
-# Ignore environment files
-.env
-.docs/
-docs/
+node_modules
+dist
+build

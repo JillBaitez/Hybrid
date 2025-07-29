@@ -182,7 +182,7 @@ async function getOffscreenDocument(): Promise<Document> {
     if (existingContexts.length === 0) {
       // Create new offscreen document
       await chrome.offscreen.createDocument({
-        url: chrome.runtime.getURL('host/0h.html'),
+        url: chrome.runtime.getURL('dist/host/0h.html'),
         reasons: [chrome.offscreen.Reason.DOM_SCRAPING],
         justification: 'HTOS provider session management'
       });
@@ -190,7 +190,7 @@ async function getOffscreenDocument(): Promise<Document> {
   } catch (error) {
     // Fallback: create offscreen document
     await chrome.offscreen.createDocument({
-      url: chrome.runtime.getURL('host/0h.html'),
+      url: chrome.runtime.getURL('dist/host/0h.html'),
       reasons: [chrome.offscreen.Reason.DOM_SCRAPING],
       justification: 'HTOS provider session management'
     });

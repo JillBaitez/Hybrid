@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Claude Test Iframe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.info { background: #d1ecf1; color: #0c5460; }
+        .log {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <h2>🧪 Claude Provider Test</h2>
+    <div id="status" class="status info">Ready to test Claude integration</div>
+    
+    <div>
+        <button onclick="testOrgId()">1. Test Org ID Fetch</button>
+        <button onclick="testCreateChat()">2. Test Create Chat</button>
+        <button onclick="testSendPrompt()">3. Test Send Prompt</button>
+        <button onclick="testFullFlow()">4. Test Full Flow</button>
+    </div>
+    
+    <div id="log" class="log"></div>
+
+    <script type="module">
+        // Import Claude provider
+        import { ClaudeProvider, CLAUDE_CONFIG } from '../providers/claude.js';
+        
+        let claudeProvider;
+        let currentChatId = null;
+        
+        // Initialize provider
+        try {
+            claudeProvider = new ClaudeProvider();
+            log('✅ Claude provider initialized');
+        } catch (error) {
+            log('❌ Failed to initialize Claude provider: ' + error.message);
+        }
+        
+        // Logging function
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function setStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+        
+        // Test functions
+        window.testOrgId = async function() {
+            try {
+                setStatus('Testing organization ID fetch...', 'info');
+                log('🔍 Fetching Claude organization ID...');
+                
+                const orgId = await claudeProvider.fetchOrgId();
+                log(`✅ Organization ID: ${orgId}`);
+                setStatus(`Organization ID fetched: ${orgId}`, 'success');
+                
+            } catch (error) {
+                log(`❌ Org ID fetch failed: ${error.message}`);
+                setStatus(`Org ID fetch failed: ${error.message}`, 'error');
+            }
+        };
+        
+        window.testCreateChat = async function() {
+            try {
+                setStatus('Testing chat creation...', 'info');
+                log('💬 Creating new Claude chat...');
+                
+                currentChatId = await claudeProvider.createChat('HTOS Test Chat');
+                log(`✅ Chat created: ${currentChatId}`);
+                setStatus(`Chat created: ${currentChatId}`, 'success');
+                
+            } catch (error) {
+                log(`❌ Chat creation failed: ${error.message}`);
+                setStatus(`Chat creation failed: ${error.message}`, 'error');
+            }
+        };
+        
+        window.testSendPrompt = async function() {
+            try {
+                setStatus('Testing prompt sending...', 'info');
+                log('📤 Sending test prompt to Claude...');
+                
+                const testPrompt = 'Hello! This is a test from HTOS. Please respond with "HTOS test successful" if you receive this.';
+                const stream = await claudeProvider.sendPrompt(testPrompt);
+                
+                log('✅ Prompt sent, reading response stream...');
+                
+                const reader = stream.getReader();
+                const decoder = new TextDecoder();
+                let response = '';
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value);
+                    response += chunk;
+                    
+                    // Log first 100 chars of each chunk
+                    log(`📥 Chunk: ${chunk.substring(0, 100)}${chunk.length > 100 ? '...' : ''}`);
+                }
+                
+                log(`✅ Full response received (${response.length} chars)`);
+                setStatus('Prompt test completed successfully', 'success');
+                
+            } catch (error) {
+                log(`❌ Prompt test failed: ${error.message}`);
+                setStatus(`Prompt test failed: ${error.message}`, 'error');
+            }
+        };
+        
+        window.testFullFlow = async function() {
+            try {
+                setStatus('Testing full Claude flow...', 'info');
+                log('🚀 Starting full Claude integration test...');
+                
+                // Step 1: Fetch org ID
+                log('Step 1: Fetching organization ID...');
+                const orgId = await claudeProvider.fetchOrgId();
+                log(`✅ Org ID: ${orgId}`);
+                
+                // Step 2: Create chat
+                log('Step 2: Creating chat conversation...');
+                currentChatId = await claudeProvider.createChat('HTOS Full Test');
+                log(`✅ Chat ID: ${currentChatId}`);
+                
+                // Step 3: Send prompt
+                log('Step 3: Sending test prompt...');
+                const testPrompt = 'Please respond with exactly: "HTOS end-to-end test successful"';
+                const stream = await claudeProvider.sendPrompt(testPrompt);
+                
+                // Step 4: Read response
+                log('Step 4: Reading streaming response...');
+                const reader = stream.getReader();
+                const decoder = new TextDecoder();
+                let fullResponse = '';
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value);
+                    fullResponse += chunk;
+                }
+                
+                log(`✅ FULL FLOW COMPLETED`);
+                log(`📊 Response length: ${fullResponse.length} characters`);
+                setStatus('🎉 Full Claude flow test successful!', 'success');
+                
+                // Send success message to parent via bus
+                if (window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'claude-test-complete',
+                        success: true,
+                        chatId: currentChatId,
+                        responseLength: fullResponse.length
+                    }, '*');
+                }
+                
+            } catch (error) {
+                log(`❌ Full flow test failed: ${error.message}`);
+                setStatus(`Full flow failed: ${error.message}`, 'error');
+                
+                // Send error message to parent
+                if (window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'claude-test-complete',
+                        success: false,
+                        error: error.message
+                    }, '*');
+                }
+            }
+        };
+        
+        // Listen for messages from parent (offscreen host)
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'run-claude-test') {
+                log('📨 Received test command from parent');
+                testFullFlow();
+            }
+        });
+        
+        // Auto-run test if requested
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('autorun') === 'true') {
+            setTimeout(() => {
+                log('🔄 Auto-running full flow test...');
+                testFullFlow();
+            }, 1000);
+        }
+        
+        log('🎯 Claude test iframe loaded and ready');
+    </script>
+</body>
+</html>

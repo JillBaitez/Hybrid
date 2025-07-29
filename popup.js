@@ -4,6 +4,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  const bus = new BroadcastChannel('bus.channel');
   const promptInput = document.getElementById('promptInput');
   const sendBtn = document.getElementById('sendBtn');
   const cspBtn = document.getElementById('cspBtn');
@@ -48,12 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     try {
       const response = await chrome.runtime.sendMessage({
-        type: 'htos.dispatch',
+        
         id: crypto.randomUUID(),
         prompt,
-        providers: selectedProviders,
-        options: {},
-        synthesis: 'raw'
+        
+        
+        
       });
       
       if (response.ok) {
@@ -82,10 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await chrome.runtime.sendMessage({
         type: 'htos.csp.allowOnce',
         id: crypto.randomUUID(),
-        payload: {
-          tabId: tab.id,
-          url: tab.url
-        }
+        tabId: tab.id,
+        url: tab.url
       });
       
       if (response.ok) {

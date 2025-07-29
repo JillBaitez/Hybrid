@@ -19,8 +19,8 @@
   if (window.IntersectionObserver) {
     const OriginalIntersectionObserver = window.IntersectionObserver;
     window.IntersectionObserver = class extends OriginalIntersectionObserver {
-      constructor(...args: any[]) {
-        super(...args);
+      constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+        super(callback, options);
         // HTOS-PILLAR-CHECK: Anti-bot IntersectionObserver patch
       }
     } as any;
@@ -50,23 +50,28 @@
   };
 
   // Patch WebGL for fingerprint masking
-  const getContext = HTMLCanvasElement.prototype.getContext;
-  HTMLCanvasElement.prototype.getContext = function(contextType: string, ...args: any[]) {
-    if (contextType === 'webgl' || contextType === 'webgl2') {
-      const context = getContext.apply(this, [contextType, ...args]);
-      if (context) {
-        // Mask WebGL fingerprinting
-        const getParameter = context.getParameter;
-        context.getParameter = function(parameter: any) {
-          if (parameter === context.RENDERER || parameter === context.VENDOR) {
-            return 'HTOS-Masked';
-          }
-          return getParameter.apply(this, [parameter]);
-        };
-      }
-      return context;
+  const originalGetContext: any = HTMLCanvasElement.prototype.getContext;
+  (HTMLCanvasElement.prototype.getContext as any) = function (
+    this: HTMLCanvasElement,
+    contextType: string,
+    options?: any
+  ): any {
+    // Only patch webgl / webgl2
+    if (contextType !== 'webgl' && contextType !== 'webgl2') {
+      return originalGetContext.call(this, contextType, options);
     }
-    return getContext.apply(this, [contextType, ...args]);
+
+    const ctx = originalGetContext.call(this, contextType, options) as WebGLRenderingContext | null;
+    if (!ctx) return ctx;
+
+    const originalGetParameter = ctx.getParameter.bind(ctx);
+    ctx.getParameter = (parameter: GLenum) => {
+      if (parameter === ctx.RENDERER || parameter === ctx.VENDOR) {
+        return 'HTOS-Masked' as any;
+      }
+      return originalGetParameter(parameter);
+    };
+    return ctx;
   };
 
   // Patch navigator properties for stealth

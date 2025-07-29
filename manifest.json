@@ -15,14 +15,14 @@
   ],
   "host_permissions": ["*://*/*"],
   "background": {
-    "service_worker": "core/sw.js",
+    "service_worker": "dist/core/sw.js",
     "type": "module"
   },
   "content_scripts": [
     {
       "matches": ["*://*/*"],
       "exclude_matches": ["*://*/pow/0f.html", "*://*/host/0h.html"],
-      "js": ["core/cs.js"],
+      "js": ["dist/core/cs.js"],
       "run_at": "document_start",
       "all_frames": true
     }
@@ -32,8 +32,8 @@
       "resources": [
           "session-layer/nj-engine.js",
           "session-layer/nj-engine.css",
-          "host/0h.html",
-          "pow/0f.html"
+          "dist/host/0h.html",
+          "dist/pow/0f.html"
         ],
       "matches": ["*://*/*"]
     }

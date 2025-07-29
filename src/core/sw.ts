@@ -9,6 +9,7 @@
  */
 
 import { IToken, ITokenStore } from '../types/tokens.js';
+import { ServiceWorkerBus } from './bus.js';
 import { IBusMessage, IBusResponse } from '../types/bus.js';
 import { IPromptJob } from '../types/prompt-job.js';
 import { dispatchPrompt } from './dispatch.js';
@@ -34,7 +35,7 @@ const HTOS_DNR_RULES = [
       resourceTypes: [chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST]
     },
     action: {
-      type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
+      type: "modifyHeaders" as chrome.declarativeNetRequest.RuleActionType,
       requestHeaders: [{
         header: "Authorization",
         operation: chrome.declarativeNetRequest.HeaderOperation.SET,
@@ -50,7 +51,7 @@ const HTOS_DNR_RULES = [
       resourceTypes: [chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST]
     },
     action: {
-      type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
+      type: "modifyHeaders" as chrome.declarativeNetRequest.RuleActionType,
       requestHeaders: [{
         header: "Authorization",
         operation: chrome.declarativeNetRequest.HeaderOperation.SET,
@@ -66,7 +67,7 @@ const HTOS_DNR_RULES = [
       resourceTypes: [chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST]
     },
     action: {
-      type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
+      type: "modifyHeaders" as chrome.declarativeNetRequest.RuleActionType,
       requestHeaders: [{
         header: "Authorization",
         operation: chrome.declarativeNetRequest.HeaderOperation.SET,
@@ -110,6 +111,9 @@ async function initializeServiceWorker(): Promise<void> {
   
   isInitialized = true;
   console.log('[HTOS] Service worker initialized');
+  // Initialize BroadcastChannel bus
+  const bus = new ServiceWorkerBus();
+  await bus.init();
 }
 
 /**
@@ -133,7 +137,7 @@ async function ensureOffscreen(): Promise<void> {
   // No existing off-screen document found, create new one
   try {
     await chrome.offscreen.createDocument({
-      url: chrome.runtime.getURL('host/0h.html'),
+      url: chrome.runtime.getURL('dist/host/0h.html'),
       reasons: [
         chrome.offscreen.Reason.LOCAL_STORAGE,
         chrome.offscreen.Reason.BLOBS,
@@ -213,26 +217,42 @@ function getRuleIdForProvider(provider: string): number | null {
 }
 
 /**
- * Message handling
+ * Legacy Message handling - DEPRECATED
+ * Replaced by BroadcastChannel bus for all messaging
+ * Keeping CSP bypass functionality until fully migrated
  */
 chrome.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
-  if (msg.type === 'htos.ping') return sendResponse({ ok: true, data: 'pong' });
+  // Keep CSP bypass for emergency fallback
   if (msg.type === 'htos.csp.error') {
     await chrome.declarativeNetRequest.updateSessionRules({
       addRules: [{
         id: 9999,
         priority: 100,
         condition: { urlFilter: msg.tabUrl },
-        action: { responseHeaders: [{ header: 'content-security-policy', operation: 'remove' }] }
+        action: { type: 'modifyHeaders' as chrome.declarativeNetRequest.RuleActionType, responseHeaders: [{ header: 'content-security-policy', operation: chrome.declarativeNetRequest.HeaderOperation.REMOVE }] }
       }]
     });
     await chrome.tabs.reload(msg.tabId);
     return;
   }
-  const res = await handleMessage(msg);
-  sendResponse(res);
+  // All other messages now use BroadcastChannel bus
+  console.warn('[HTOS] Legacy runtime message received:', msg.type, '- should use bus');
+  sendResponse({ ok: false, error: 'Use BroadcastChannel bus for messaging' });
   return true;
 });
+
+/**
+ * External message handling - DEPRECATED
+ * Legacy support for external messages
+ * TODO: Remove after confirming no external dependencies
+ */
+/*
+chrome.runtime.onMessageExternal.addListener(async (msg, sender, sendResponse) => {
+  console.warn('[HTOS] Legacy external message received:', msg.type, '- should use bus');
+  sendResponse({ ok: false, error: 'Use BroadcastChannel bus for messaging' });
+  return true;
+});
+*/
 
 async function handleMessage(msg: any): Promise<any> {
   switch (msg.type) {

@@ -1,0 +1,35 @@
+{
+  "name": "Claude",
+  "baseUrl": "https://claude.ai",
+  "authType": "session",
+  "endpoints": {
+    "chat": "/api/organizations/*/chat_conversations/*/completion",
+    "models": "/api/organizations/*/models",
+    "auth": "/api/auth/current_user"
+  },
+  "headers": {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "text/event-stream",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Content-Type": "application/json"
+  },
+  "rateLimit": {
+    "requests": 30,
+    "window": 3600000
+  },
+  "selectors": {
+    "chatInput": "div[contenteditable='true'][data-testid='chat-input']",
+    "sendButton": "button[data-testid='send-message-button']",
+    "messageContainer": "[data-testid='message']",
+    "loginButton": "button[data-testid='login-button']",
+    "sessionIndicator": "[data-testid='user-menu']"
+  },
+  "tokenExtraction": {
+    "type": "cookie",
+    "name": "sessionKey",
+    "fallback": {
+      "type": "localStorage",
+      "key": "claude_auth"
+    }
+  }
+}

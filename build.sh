@@ -1,7 +1,6 @@
 #!/bin/bash
 
-echo "🚀 HTOS Automated Build"
-echo "======================"
+echo "Building HTOS extension..."
 
 # Clean previous build
 echo "📦 Cleaning dist..."

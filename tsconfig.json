@@ -13,6 +13,6 @@
     "rootDir": "./src",
     "types": ["chrome"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "docs/claude.ts"],
   "exclude": ["node_modules", "dist"]
 }

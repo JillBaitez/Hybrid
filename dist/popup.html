@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTOS - AI Orchestration</title>
+  <style>
+    body {
+      width: 320px;
+      min-height: 400px;
+      margin: 0;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    
+    .subtitle {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    
+    .prompt-section {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .prompt-input {
+      width: 100%;
+      min-height: 80px;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+      font-size: 14px;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+    
+    .prompt-input::placeholder {
+      color: #666;
+    }
+    
+    .providers {
+      display: flex;
+      gap: 8px;
+      margin: 12px 0;
+      flex-wrap: wrap;
+    }
+    
+    .provider-chip {
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    
+    .provider-chip.active {
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+    }
+    
+    .provider-chip:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .send-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    
+    .send-btn:hover {
+      transform: translateY(-1px);
+    }
+    
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .status {
+      margin-top: 12px;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      text-align: center;
+    }
+    
+    .status.success {
+      background: rgba(46, 204, 113, 0.2);
+      border: 1px solid rgba(46, 204, 113, 0.5);
+    }
+    
+    .status.error {
+      background: rgba(231, 76, 60, 0.2);
+      border: 1px solid rgba(231, 76, 60, 0.5);
+    }
+    
+    .csp-section {
+      margin-top: 16px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+    }
+    
+    .csp-btn {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 6px;
+      background: rgba(255, 193, 7, 0.8);
+      color: #333;
+      font-size: 12px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">HTOS</div>
+    <div class="subtitle">Hybrid Thinking Sidecar OS</div>
+  </div>
+  
+  <div class="prompt-section">
+    <textarea 
+      id="promptInput" 
+      class="prompt-input" 
+      placeholder="Ask all models a question..."
+      rows="3"
+    ></textarea>
+    
+    <div class="providers">
+      <div class="provider-chip active" data-provider="chatgpt">ChatGPT</div>
+      <div class="provider-chip active" data-provider="claude">Claude</div>
+      <div class="provider-chip active" data-provider="gemini">Gemini</div>
+    </div>
+    
+    <button id="sendBtn" class="send-btn">Send to All Models</button>
+    
+    <div id="status" class="status" style="display: none;"></div>
+  </div>
+  
+  <div class="csp-section">
+    <div style="font-size: 12px; margin-bottom: 8px;">CSP Bypass (if needed):</div>
+    <button id="cspBtn" class="csp-btn">Allow Once for Current Tab</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

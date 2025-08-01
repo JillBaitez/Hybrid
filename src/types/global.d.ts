@@ -1,9 +1,17 @@
 declare global {
   interface Window {
-    htosApp: any;
-    htos: any;
+    // HTOS global app instance (HARPA-inspired architecture)
+    htosApp?: any;
+    
+    // Legacy/alternative HTOS reference
+    htos?: any;
+    
+    // AI provider globals
+    ai?: any;
+    arkose?: any;
   }
   
+  // Chrome Extension API extensions
   namespace chrome.runtime {
     interface ContextFilter {
       contextTypes?: string[];

@@ -1,0 +1,77 @@
+/**
+ * HTOS Injection Engine Styles (nj-engine.css)
+ * 
+ * Minimal CSS for injection engine components.
+ * Ensures stealth operation and proper isolation.
+ */
+
+/* HTOS Root Container */
+htos-root {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  z-index: 2147483647 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+}
+
+/* HTOS Iframe Container */
+htos-root iframe {
+  position: absolute !important;
+  top: -9999px !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  border: none !important;
+  background: transparent !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Anti-Detection Styles */
+htos-root * {
+  all: unset !important;
+  display: none !important;
+}
+
+/* Stealth Mode Overrides */
+.htos-stealth {
+  content-visibility: visible !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+}
+
+/* Provider-Specific Overrides */
+[data-htos-provider="openai"] {
+  /* OpenAI-specific stealth styles */
+}
+
+[data-htos-provider="claude"] {
+  /* Claude-specific stealth styles */
+}
+
+[data-htos-provider="gemini"] {
+  /* Gemini-specific stealth styles */
+}
+
+/* Debug Mode (only active in development) */
+.htos-debug htos-root {
+  visibility: visible !important;
+  opacity: 1 !important;
+  background: rgba(255, 0, 0, 0.1) !important;
+  border: 1px solid red !important;
+}
+
+.htos-debug htos-root iframe {
+  visibility: visible !important;
+  opacity: 1 !important;
+  background: rgba(0, 255, 0, 0.1) !important;
+  border: 1px solid green !important;
+}

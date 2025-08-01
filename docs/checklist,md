@@ -1,0 +1,81 @@
+# HTOS Orchestration Engine Implementation Plan
+
+## Notes
+- Implementation plan is structured in 6 phases, per user-provided document.
+- Focus is currently on Phase 2: Message Bus & Communication Layer.
+- Each phase builds upon the previous, with foundational work prioritized.
+- Use [FLAG: ...] notation for any file replacements or deletions.
+- Ask for clarification on any ambiguous requirements before proceeding.
+- Always check file contents before making changes to avoid regressions or redundant work.
+- Build system and static file copying (HTML/JS for offscreen, content) now fixed and validated.
+- Offscreen document creation error was due to a path mismatch (host/0h.html vs OS/0h.html); now fixed in service worker and build output.
+- Secure, encrypted service worker-only token storage is now implemented and build validated.
+- Secure, automated token refresh management is now implemented and build validated.
+- Provider abstraction layer (multi-provider registry/adapters) is now implemented and integrated; Phase 1 is fully complete and validated.
+- Context adapters (SW, Offscreen, CS, Popup) and streaming handler implemented; integration in progress.
+- TypeScript type/lint errors detected in context adapters and streaming handler; must resolve before further integration.
+- Type system complexity is blocking progress; will prioritize working message bus integration and defer strict type safety until after core functionality is running and tested. [CODE IS TRUTH]
+
+## Task List
+### Phase 0: Restructuring & Architecture Foundation
+- [ ] File inventory and codebase audit
+- [ ] Compare current vs. planned architecture
+- [ ] Map dependencies and circular references
+- [ ] Identify deprecated patterns and dead code
+- [ ] Document migration path and module boundaries
+- [ ] Define interface contracts and communication patterns
+- [ ] Document security and architecture model
+- [ ] Set up build system, dev workflow, and testing framework
+
+### Phase 1: DNR Rule System & Token Management
+- [x] Implement DNR Rule Registry with lifecycle control
+- [x] Enable conditional DNR rule activation (after token capture)
+- [x] Add tab-specific rule management and cleanup
+- [x] Validate rules with type-safe definitions
+- [x] Integrate token extraction logic (with expiration check)
+- [x] Implement secure, SW-only token storage (with encryption)
+- [x] Automate token refresh/expiration/cleanup
+- [x] Abstract token management for all providers
+- [x] Bootstrap authentication flow: allow initial page load before rule activation
+- [x] Detect successful authentication events
+- [x] Activate DNR rules only after token capture
+- [x] Handle fallback when token capture fails
+- [x] Ensure Claude.ai loads without blank page issue
+- [x] Validate secure token storage and conditional DNR activation
+
+### Phase 2: Message Bus & Communication Layer
+- [ ] Define TypeScript interfaces for bus message types
+- [x] Integrate message bus pragmatically with Phase 1 systems (prioritize working system over perfect types)
+- [x] Implement context adapters (SW, Offscreen, CS, Popup)
+- [x] Add streaming/chunked response support
+- [ ] Migrate from chrome.runtime.sendMessage to BroadcastChannel
+- [ ] Implement error propagation and message routing
+- [ ] Ensure all messaging uses BroadcastChannel exclusively
+
+### Phase 3: Offscreen Document & Execution Environment
+- [ ] Implement offscreen document lifecycle and health monitoring
+- [ ] Add dynamic iframe creation and provider routing
+- [ ] Ensure CSP-free execution and sandboxing
+- [ ] Enable script injection and DOM manipulation in iframes
+- [ ] Optimize resource management and error handling
+
+### Phase 4: Content Scripts & Page Bridge
+- [ ] Implement manifest and programmatic content script injection
+- [ ] Establish secure page ↔ extension bridge
+- [ ] Extract provider tokens from page context
+- [ ] Monitor DOM for provider UI changes
+- [ ] Intercept provider API requests and responses
+
+### Phase 5: Provider Adapters & Session Management
+- [ ] Implement provider adapter pattern and registry
+- [ ] Support dynamic loading and configuration management
+- [ ] Establish session lifecycle and authentication flows
+- [ ] Enable concurrent provider sessions
+- [ ] Complete ChatGPT, Claude, Gemini, and generic adapters
+
+### Phase 6: UI Integration & User Experience
+- [ ] Integrate popup UI with new architecture
+- [ ] Implement real-time feedback and smooth user flows
+
+## Current Goal
+Test and validate message bus communication end-to-end

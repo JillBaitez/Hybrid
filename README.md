@@ -1,129 +1,219 @@
-# 🛠️ HTOS Engine — Canonical Implementation Plan  
-*(Copy-paste into your README.md or Jira epic; every task is ordered and references the exact HARPA snippets to lift, rename, and transplant.)*
+# HTOS - AI Provider Orchestration Engine
+
+> **Multi-provider AI orchestration without API keys**  
+> Chrome extension that authenticates as user to ChatGPT, Claude, and Gemini, dispatches prompts in parallel, and synthesizes responses.
 
 ---
 
-## 🎯 Goal Recap (1-sentence)
-Build a **Manifest-V3** Chrome extension that can **log-in-as-user** to ChatGPT / Claude / Gemini **without API keys**, dispatch prompts in parallel, and merge answers — while **never breaking the two pillars**:  
-1) **DNR-before-JS race win**, 2) **Service-Worker-only authority**.
+## 🎯 Project Overview
 
-                                                                                                                               |
+HTOS is a Manifest V3 Chrome extension that enables seamless interaction with multiple AI providers through browser-based authentication. The system captures user sessions, manages provider tokens securely, and orchestrates parallel prompt dispatch with intelligent response synthesis.
 
----
+### **Core Capabilities**
+- **Session-based Authentication**: No API keys required - uses existing browser sessions
+- **Parallel Provider Dispatch**: Send prompts to multiple providers simultaneously
+- **Intelligent Synthesis**: Merge and deduplicate responses from different providers
+- **Secure Token Management**: Service Worker-only authority with proper isolation
+- **Anti-Bot Integration**: WASM-based proof-of-work for challenge solving
 
-## 📅 8-Week Build Plan (MVP)
-
-### Week 0 — Repo & Tooling
-- `npm init -y` → `manifest.json` V3 scaffold.  
-- Prettier + ESLint + Rollup (`rollup.config.mjs`).  
-- **Golden Rule file**: `.rego.yml` that contains the **Immutable Architecture Pillars** (see previous doc).  
-
----
-
-### Week 1 — Service Worker Skeleton (`core/sw.js`)
-1. Create `src/core/sw.ts`.  
-2. **Copy** HARPA’s `chrome.declarativeNetRequest.updateSessionRules` block (≈ 20 lines).  
-   - Change rule IDs to `htos-*`.  
-   - Replace endpoints with `chatgpt.com`, `claude.ai`, `gemini.google.com`.  
-3. **Copy** the MobX store pattern (`$settings`, `$tokens`).  
-4. Add minimal `chrome.runtime.onStartup` listener → call `ensureOffscreen()` (see next step).
+### **Architecture Pillars**
+1. **DNR-before-JS**: DeclarativeNetRequest rules activate only after token capture
+2. **Service Worker Authority**: All sensitive operations centralized in SW context
+3. **Modular Provider System**: Extensible adapter pattern for new providers
+4. **Robust Communication**: BroadcastChannel-based message bus across contexts
 
 ---
 
-### Week 2 — Off-screen Host (`host/0h.ts`) + Iframe Engine
-1. `src/host/0h.ts`  
-   - Lift `chrome.offscreen.createDocument` from HARPA `os.js`.  
-   - Rename iframe src → `chrome.runtime.getURL('pow/0f.html')`.  
-2. `src/pow/0f.html` + `0f.ts`  
-   - Inject `<script src="0f.js"></script>` (lifted WASM SHA3).  
-3. **Bus handshake**: `postMessage({type:'htos.pow.ready'})`.
+## 🏗️ Implementation Status
+
+**Current Phase**: Phase 0 - Architecture Foundation  
+**Overall Progress**: ~30% (Foundation and planning complete)
+
+### **Phase Progress**
+- ✅ **Phase 0**: Restructuring & Architecture (Complete)
+- 🔄 **Phase 1**: DNR Rule System & Token Management (In Progress)
+- ⏳ **Phase 2**: Message Bus & Communication Layer
+- ⏳ **Phase 3**: Offscreen Document & Execution Environment
+- ⏳ **Phase 4**: Content Scripts & Page Bridge
+- ⏳ **Phase 5**: Provider Adapters & Session Management
+- ⏳ **Phase 6**: UI Integration & User Experience
+- ⏳ **Phase 7**: Testing & Quality Assurance
 
 ---
 
-### Week 3 — Bridge Script (`bridge/nj.js`) + Content Script
-1. `src/bridge/nj.js`  
-   - Copy verbatim; change global namespace.  
-2. `src/core/cs.ts`  
-   - Copy HARPA’s anti-bot patches.  
-   - Inject `nj.js` via `script.src = chrome.runtime.getURL('bridge/nj.js')`.
+## 🚨 Known Issues
+
+### **Critical: Claude.ai Blank Page**
+**Status**: Diagnosed, solution identified  
+**Impact**: Claude.ai shows blank page when extension is active
+
+**Root Cause**: DNR rule strips Authorization headers before token capture, breaking bootstrap API calls
+
+**Solution**: Implement conditional DNR activation - allow initial auth flow, then activate header stripping
 
 ---
 
-### Week 4 — Provider Adapters (JSON + TS)
-| File | Purpose |
-|------|---------|
-| `adapters/chatgpt.json` | `{loginUrl, selectors, endpoints}` |
-| `adapters/chatgpt.ts` | Implements `login()`, `getToken()`, `sendPrompt()` via `fetch` + cookies extracted by iframe. |
-Lift cookie extraction logic from HARPA `bg.js` `$ai.api`.  
-Create **interface** `IProviderAdapter` → enforce `.json` + `.ts` contract.
+## 🛠️ Development Setup
 
----
+### **Prerequisites**
+- Node.js 18+
+- Chrome/Chromium browser
+- TypeScript 5.0+
 
-### Week 5 — Parallel Dispatcher (`core/dispatch.ts`)
-- Copy HARPA’s `Promise.allSettled` pattern (`$ai.controller` lines ≈ 20300).  
-- Replace `harpa` prefixes with `htos`.  
-- Inject tokens from SW memory (never from page).
+### **Quick Start**
+```bash
+# Clone and setup
+git clone <repository>
+cd htos-extension
+npm install
 
----
+# Development build
+npm run build:dev
 
-### Week 6 — Result Synthesizer (`core/synthesis.ts`)
-- Simple merge: markdown concat + de-duplication.  
-- Future: LLM-based merge (pluggable).
+# Load extension in Chrome
+# 1. Open chrome://extensions/
+# 2. Enable Developer mode
+# 3. Click "Load unpacked" → select dist/ folder
+```
 
----
-
-### Week 7 — Command Palette UI
-- `popup.html` + vanilla TS.  
-- Send `{type:'htos.dispatch', prompt}` to SW via `chrome.runtime.sendMessage`.
-
----
-
-### Week 8 — Regression Tests
-- **CI step**: Puppeteer test that asserts:  
-  1. DNR rule present in `chrome.declarativeNetRequest.getSessionRules()`.  
-  2. Offscreen iframe responds to `htos.pow.ping` within 2 s.  
-  3. No token strings in content-script logs.
-
----
-
-## 🔄 Weekly Micro-Checklist (paste into GitHub issues)
-
-| Week | Deliverable | Acceptance Criteria |
-|------|-------------|---------------------|
-| 0 | Repo & CI | `npm run lint && npm run build` green, `.rego.yml` committed. |
-| 1 | SW + DNR | `chrome.declarativeNetRequest.getSessionRules()` returns ≥3 rules with `htos-*` ids. |
-| 2 | Offscreen | `chrome://extensions → Service Workers → inspect → console` shows `htos.pow.ready`. |
-| 3 | CS + Bridge | Content-script loads `nj.js`; `window.htosBridge` exists in page context. |
-| 4 | 1 Adapter | `ChatGPTAdapter.login()` returns non-empty cookie string. |
-| 5 | Dispatcher | `/test/dispatch.spec.ts` passes with 3 providers in parallel. |
-| 6 | Synthesis | Output markdown contains headings from each provider. |
-| 7 | UI | Popup sends prompt → SW → returns merged answer in <5 s. |
-| 8 | Tests | All regression tests pass in headless Chrome. |
-
----
-
-## 📚 Snippet Index (for devs)
-
-| Task | HARPA Line Hint | New File |
-|------|-----------------|----------|
-| DNR rule for auth header | `bg.js:20403-20410` | `core/sw.ts` |
-| Offscreen keep-alive ping | `os.js:1190-1220` | `host/0h.ts` |
-| Anti-bot patches | `cs.js:50-90` | `core/cs.ts` |
-| SHA3 WASM import | `oi.js:1-30` | `pow/0f.ts` |
-| IndexedDB wrapper | `cs-web.js:200-250` | `storage/idb.ts` |
-
----
-
-## 🚨 Stop-If-Changed Guardrails
-
-Add to `dangerfile.js`:
-```js
-fail("DNR rules removed", !rules.some(r => r.id.startsWith('htos-')));
-fail("Offscreen creation moved out of SW", !swCode.includes('chrome.offscreen.createDocument'));
-fail("Token stored in content-script", csCode.includes('localStorage.setItem("token"'));
+### **Development Commands**
+```bash
+npm run build          # Production build
+npm run build:dev      # Development build with source maps
+npm run watch          # Watch mode for development
+npm run lint           # ESLint + Prettier
+npm run test           # Run test suite
+npm run test:e2e       # End-to-end tests
 ```
 
 ---
 
-Ship the MVP.  
-Then iterate on synthesis quality, more providers, and UI polish — **but never compromise the pillars.**#
+## 📋 Implementation Roadmap
+
+> **Detailed implementation plan**: See [`docs/implementation.plan.md`](docs/implementation.plan.md)
+
+### **Phase 1: DNR & Token Management** (Current)
+- [ ] Conditional DNR rule activation
+- [ ] Token capture and secure storage
+- [ ] Provider authentication flows
+- [ ] Rule lifecycle management
+
+### **Phase 2: Communication Layer**
+- [ ] BroadcastChannel message bus
+- [ ] Legacy chrome.runtime migration
+- [ ] Typed message contracts
+- [ ] Streaming response support
+
+### **Phase 3: Execution Environment**
+- [ ] Offscreen document management
+- [ ] Iframe factory and lifecycle
+- [ ] CSP bypass implementation
+- [ ] Health monitoring and recovery
+
+### **Phase 4: Content Scripts**
+- [ ] Dual injection strategy (manifest + programmatic)
+- [ ] Page bridge implementation
+- [ ] Token extraction logic
+- [ ] Provider-specific integrations
+
+### **Phase 5: Provider System**
+- [ ] Adapter pattern implementation
+- [ ] Session management
+- [ ] Parallel dispatch system
+- [ ] Provider registry
+
+### **Phase 6: User Interface**
+- [ ] Popup UI integration
+- [ ] Real-time response streaming
+- [ ] Multi-provider synthesis
+- [ ] History and export features
+
+### **Phase 7: Testing & QA**
+- [ ] Comprehensive test suite
+- [ ] CI/CD pipeline
+- [ ] Cross-browser compatibility
+- [ ] Performance optimization
+
+---
+
+## 🏛️ Architecture Overview
+
+### **Context Hierarchy**
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Popup UI      │    │  Content Script │    │  Service Worker │
+│   (popup.js)    │    │   (cs.js)       │    │    (sw.js)      │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                    ┌─────────────────┐
+                    │ Offscreen Host  │
+                    │   (0h.js)       │
+                    └─────────────────┘
+                             │
+                    ┌─────────────────┐
+                    │ Provider Iframe │
+                    │   (0f.js)       │
+                    └─────────────────┘
+```
+
+### **Message Flow**
+1. **User Input**: Popup → BroadcastChannel → Service Worker
+2. **Provider Dispatch**: SW → Offscreen → Provider Iframe
+3. **Response Collection**: Iframe → Offscreen → SW → Popup
+4. **Token Management**: Content Script → SW (secure storage)
+
+### **Security Model**
+- **Service Worker**: Sole authority for tokens and network rules
+- **Content Scripts**: Token extraction only, no storage
+- **Offscreen Context**: Isolated execution for provider interactions
+- **DNR Rules**: Conditional activation based on authentication state
+
+---
+
+## 📚 Documentation
+
+- **[Implementation Plan](docs/implementation.plan.md)**: Detailed phase-by-phase roadmap
+- **[Architecture Decisions](docs/architecture/)**: Technical design decisions
+- **[API Documentation](docs/api/)**: Internal API reference
+- **[Provider Integration](docs/providers/)**: Adding new providers
+- **[Testing Guide](docs/testing/)**: Testing strategies and tools
+
+---
+
+## 🤝 Contributing
+
+### **Development Workflow**
+1. Create feature branch from `main`
+2. Implement changes following architecture guidelines
+3. Add/update tests for new functionality
+4. Ensure all linting and tests pass
+5. Submit PR with detailed description
+
+### **Code Standards**
+- TypeScript strict mode enabled
+- ESLint + Prettier for formatting
+- Comprehensive JSDoc for public APIs
+- Test coverage minimum 80%
+
+### **Architecture Guidelines**
+- Maintain Service Worker authority model
+- Use BroadcastChannel for all inter-context communication
+- Implement proper error handling and recovery
+- Follow security best practices for token handling
+
+---
+
+## 📄 License
+
+[License Type] - See [LICENSE](LICENSE) file for details
+
+---
+
+## 🔗 Links
+
+- **Issues**: [GitHub Issues](../../issues)
+- **Discussions**: [GitHub Discussions](../../discussions)
+- **Releases**: [GitHub Releases](../../releases)
+- **Documentation**: [Project Wiki](../../wiki)#

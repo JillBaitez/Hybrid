@@ -1,0 +1,48 @@
+[
+  {
+    "id": 1005,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Cookie",
+          "operation": "set",
+          "value": "__Secure-1PSID={{HTOS_GEMINI_TOKEN}}"
+        },
+        {
+          "header": "User-Agent",
+          "operation": "set",
+          "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "https://gemini.google.com/_/BardChatUi/*",
+      "resourceTypes": ["xmlhttprequest"]
+    }
+  },
+  {
+    "id": 1006,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Content-Type",
+          "operation": "set",
+          "value": "application/x-www-form-urlencoded"
+        },
+        {
+          "header": "Accept",
+          "operation": "set",
+          "value": "*/*"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "https://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate",
+      "resourceTypes": ["xmlhttprequest"]
+    }
+  }
+]

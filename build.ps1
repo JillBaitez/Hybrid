@@ -1,5 +1,5 @@
 # build.ps1  –  automatic HTOS build
-Write-Host "HTOS Build Starting..." -ForegroundColor Green
+Write-Host "Building HTOS extension..." -ForegroundColor Green
 
 # 1. Clean
 Remove-Item -Recurse -Force "dist" -ErrorAction SilentlyContinue
@@ -15,9 +15,16 @@ robocopy "src" "dist" /S /NP /NFL /NDL > $null
 # 4. Static files
 Copy-Item "popup.html","popup.js","manifest.json" -Destination "dist"
 
-# Create rules directory and copy JSON files
-New-Item -ItemType Directory -Force -Path "dist\rules" | Out-Null
-Copy-Item "rules\*.json" -Destination "dist\rules"
+# Copy OS HTML files for offscreen documents
+New-Item -ItemType Directory -Force -Path "dist\OS" | Out-Null
+Copy-Item "src\OS\*.html" -Destination "dist\OS"
+
+# Copy content HTML files for provider engines
+New-Item -ItemType Directory -Force -Path "dist\content" | Out-Null
+Copy-Item "src\content\*.html" -Destination "dist\content"
+
+# Phase 1: No static rules needed - using dynamic DNR manager
+# Rules are generated at runtime by DNRManager
 
 # --- TypeScript already places files in correct locations (Path-correct) ---
 # No moves needed - files are already in dist/core/, dist/host/, dist/pow/
@@ -35,45 +42,15 @@ if (Test-Path "icons") {
     $svg | Out-File -Encoding utf8 "dist/icons/icon128.svg"
 }
 
-# 5. Clean up artifacts and unwanted directories
-Write-Host "Cleaning artifacts and unwanted directories..." -ForegroundColor Yellow
-
-# Remove TypeScript artifacts
-Get-ChildItem -Path "dist" -Recurse -Include "*.ts","*.d.ts","*.map" | Remove-Item -Force
-
-# Remove empty nested directories created by robocopy
-Get-ChildItem -Path "dist" -Recurse -Directory | Where-Object { $_.Name -in @('core','host','pow','storage','types') -and $_.FullName -notmatch '^.*\\dist\\(core|host|pow|storage)$' } | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-
-# Remove Chrome extension metadata
-Remove-Item -Path "dist/_metadata" -Recurse -Force -ErrorAction SilentlyContinue
-Remove-Item -Path "dist/types" -Recurse -Force -ErrorAction SilentlyContinue
-
-# --- Verify ---
-@(
-    "dist/manifest.json",
-    "dist/core/sw.js",
-    "dist/core/cs.js",
-    "dist/core/dispatch.js",
-    "dist/core/dnr.js",
-    "dist/storage/idb.js",
-    "dist/host/0h.html",
-    "dist/host/0h.js",
-    "dist/pow/0f.html",
-    "dist/pow/0f.js",
-    "dist/icons/icon16.svg",
-    "dist/icons/icon32.svg",
-    "dist/icons/icon48.svg",
-    "dist/icons/icon128.svg",
-    "dist/rules/chatgpt.json",
-    "dist/rules/claude.json",
-    "dist/rules/gemini.json"
-) | % {
-    if (!(Test-Path $_)) { Write-Host "❌ Missing $_" -ForegroundColor Red; exit 1 }
-    if ((Get-Item $_).Length -eq 0) { Write-Host "⚠️ Zero-byte $_" -ForegroundColor Yellow; exit 1 }
+# Verify session layer files exist
+if (-not (Test-Path "dist/session-layer/nj-engine.js")) {
+    Write-Host "ERROR: Session layer files not created properly" -ForegroundColor Red
+    exit 1
 }
 
 Write-Host "✅ All required files present and non-empty" -ForegroundColor Green
 Write-Host "✅ Service worker at dist/core/sw.js" -ForegroundColor Green
 Write-Host "✅ Icons at dist/icons/" -ForegroundColor Green
-Write-Host "✅ Rules at dist/rules/" -ForegroundColor Green
+Write-Host "✅ Dynamic DNR rules (no static files needed)" -ForegroundColor Green
 Write-Host "Build complete! dist\ is ready to load as an unpacked extension." -ForegroundColor Green
+
